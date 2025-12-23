@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验组 - 图形对称实验</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+        
+        h2 {
+            color: #3498db;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+        
+        .instructions {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid #3498db;
+            font-size: 1.2rem;
+        }
+        
+        .emoji {
+            font-size: 1.5rem;
+            margin-right: 8px;
+        }
+        
+        .btn {
+            display: block;
+            margin: 30px auto;
+            padding: 15px 40px;
+            font-size: 1.3rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .grid-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 30px 0;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-gap: 3px;
+            width: 500px;
+            height: 500px;
+            background-color: #ecf0f1;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .cell {
+            background-color: white;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .cell.active {
+            background-color: #2ecc71;
+            border-color: #27ae60;
+        }
+        
+        .counter {
+            text-align: center;
+            font-size: 1.5rem;
+            margin: 25px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .counter span {
+            font-weight: bold;
+            color: #e74c3c;
+            font-size: 2rem;
+        }
+        
+        .completion-message {
+            text-align: center;
+            padding: 25px;
+            background-color: #d5edda;
+            color: #155724;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-size: 1.3rem;
+            display: none;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .trial-info {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-weight: 600;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .trial-scores {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .trial-score {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px;
+            min-width: 180px;
+            text-align: center;
+        }
+        
+        .trial-score h4 {
+            margin-bottom: 10px;
+            color: #3498db;
+        }
+        
+        .trial-score p {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            margin: 20px 0 30px;
+            height: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: #3498db;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .transition-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            z-index: 1000;
+            display: none;
+            font-size: 2rem;
+            color: #2c3e50;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                width: 350px;
+                height: 350px;
+            }
+            
+            .btn {
+                padding: 12px 30px;
+                font-size: 1.1rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .trial-scores {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>图形对称实验 - 实验组</h1>
+    
+    <!-- 指导语页面 -->
+    <div id="instruction-page" class="container">
+        <h2>实验说明</h2>
+        <div class="instructions">
+            <p><span class="emoji">🎯</span>欢迎━(*｀∀´*)ノ亻!参加本次实验！</p>
+            <p>您需要用最短点击次数让网格图形对称。</p>
+            <p>实验开始后，您将看到一个10×10的网格，其中有一个绿色不对称图形。</p>
+            <p>您需要<strong>直接在图形上点击方格</strong>来切换方格状态（填充/空白），使图形变得对称。</p>
+            <p>一旦图形对称，将自动进入下一个图形任务。</p>
+            <p>本实验包含<strong>4个不同的图形任务</strong>，请依次完成。</p>
+            <p>如果您已经明白该怎么做，请点击开始按键。</p>
+        </div>
+        <button id="start-btn" class="btn">开始实验</button>
+    </div>
+    
+    <!-- 实验页面 -->
+    <div id="experiment-page" class="container hidden">
+        <h2>图形对称任务</h2>
+        
+        <div class="trial-info">
+            任务 <span id="current-trial">1</span> / 4
+        </div>
+        
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar" style="width: 25%"></div>
+        </div>
+        
+        <div class="grid-container">
+            <div class="instructions" style="margin-bottom: 20px;">
+                <p>请点击方格切换其状态，使图形变得对称。</p>
+                <p>当图形对称时，将自动进入下一个任务。</p>
+            </div>
+            
+            <div id="grid" class="grid"></div>
+        </div>
+        
+        <div class="counter">
+            点击次数：<span id="click-count">0</span>
+        </div>
+    </div>
+    
+    <!-- 完成页面 -->
+    <div id="completion-page" class="container hidden">
+        <h2>实验完成</h2>
+        <div class="completion-message">
+            <p>恭喜！您已成功完成全部4个图形任务！</p>
+            <p>以下是您的成绩：</p>
+            
+            <div class="trial-scores">
+                <div class="trial-score">
+                    <h4>图形 1</h4>
+                    <p id="trial1-score">0</p> 次点击
+                </div>
+                <div class="trial-score">
+                    <h4>图形 2</h4>
+                    <p id="trial2-score">0</p> 次点击
+                </div>
+                <div class="trial-score">
+                    <h4>图形 3</h4>
+                    <p id="trial3-score">0</p> 次点击
+                </div>
+                <div class="trial-score">
+                    <h4>图形 4</h4>
+                    <p id="trial4-score">0</p> 次点击
+                </div>
+            </div>
+            
+            <p style="margin-top: 30px;">总点击次数：<strong id="total-clicks">0</strong></p>
+            <p>平均每次任务点击次数：<strong id="average-clicks">0</strong></p>
+            <p>感谢您的参与！</p>
+        </div>
+    </div>
+    
+    <!-- 任务转换提示 -->
+    <div id="transition-message" class="transition-message">
+        任务完成！准备下一个图形...
+    </div>
+    
+    <div class="footer">
+        <p>图形对称实验 - 实验组 | 需要完成四次任务，最后一次与对照组相同</p>
+    </div>
+
+    <script>
+        // 全局变量
+        let clickCount = 0;
+        let grid = [];
+        const gridSize = 10;
+        let isSymmetrical = false;
+        let currentTrial = 0;
+        const totalTrials = 4;
+        let trialScores = [0, 0, 0, 0];
+        
+        // 预定义的不对称图形（实验组使用四个不对称图形，最后一个与对照组相同）
+        const asymmetricPatterns = [
+            // 图形1：不对称图形（L形）
+            [
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,1,0,0,0,0,0,0,0],
+                [0,0,1,0,0,0,0,0,0,0],
+                [0,0,1,0,0,0,0,0,0,0],
+                [0,0,1,1,1,1,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0]
+            ],
+            // 图形2：不对称图形（T形偏移）
+            [
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,0,0,0,1,0,0,0,0,0],
+                [0,0,0,0,1,0,0,0,0,0],
+                [0,0,0,0,1,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0]
+            ],
+            // 图形3：不对称图形（阶梯形）
+            [
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,1,0,0,0,0,0,0,0],
+                [0,0,1,1,0,0,0,0,0,0],
+                [0,0,1,1,1,0,0,0,0,0],
+                [0,0,1,1,1,1,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0]
+            ],
+            // 图形4：与对照组相同的图形
+            [
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,1,1,1,0,0,0,0,0],
+                [0,0,1,0,0,1,0,0,0,0],
+                [0,0,1,0,0,0,1,0,0,0],
+                [0,0,1,0,0,1,0,0,0,0],
+                [0,0,1,1,1,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0]
+            ]
+        ];
+        
+        // DOM元素
+        const instructionPage = document.getElementById('instruction-page');
+        const experimentPage = document.getElementById('experiment-page');
+        const completionPage = document.getElementById('completion-page');
+        const startBtn = document.getElementById('start-btn');
+        const gridElement = document.getElementById('grid');
+        const clickCountElement = document.getElementById('click-count');
+        const currentTrialElement = document.getElementById('current-trial');
+        const progressBar = document.getElementById('progress-bar');
+        const transitionMessage = document.getElementById('transition-message');
+        const trialScoreElements = [
+            document.getElementById('trial1-score'),
+            document.getElementById('trial2-score'),
+            document.getElementById('trial3-score'),
+            document.getElementById('trial4-score')
+        ];
+        const totalClicksElement = document.getElementById('total-clicks');
+        const averageClicksElement = document.getElementById('average-clicks');
+        
+        // 初始化网格
+        function initGrid(trialIndex) {
+            // 清空网格
+            gridElement.innerHTML = '';
+            
+            // 重置变量
+            clickCount = 0;
+            clickCountElement.textContent = clickCount;
+            grid = [];
+            isSymmetrical = false;
+            
+            // 设置目标图形
+            grid = JSON.parse(JSON.stringify(asymmetricPatterns[trialIndex]));
+            
+            // 更新当前试验显示
+            currentTrial = trialIndex + 1;
+            currentTrialElement.textContent = currentTrial;
+            
+            // 更新进度条
+            progressBar.style.width = `${(currentTrial / totalTrials) * 100}%`;
+            
+            // 创建网格单元格
+            for (let row = 0; row < gridSize; row++) {
+                for (let col = 0; col < gridSize; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    if (grid[row][col] === 1) {
+                        cell.classList.add('active');
+                    }
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    
+                    // 点击切换单元格状态
+                    cell.addEventListener('click', () => {
+                        if (isSymmetrical) return; // 如果已经对称，不再响应点击
+                        
+                        const row = parseInt(cell.dataset.row);
+                        const col = parseInt(cell.dataset.col);
+                        
+                        // 切换状态
+                        grid[row][col] = grid[row][col] === 1 ? 0 : 1;
+                        
+                        // 更新UI
+                        cell.classList.toggle('active');
+                        
+                        // 更新点击计数
+                        clickCount++;
+                        clickCountElement.textContent = clickCount;
+                        
+                        // 检查对称性
+                        checkSymmetry();
+                    });
+                    
+                    gridElement.appendChild(cell);
+                }
+            }
+        }
+        
+        // 检查图形是否对称
+        function checkSymmetry() {
+            // 检查垂直对称（左右对称）
+            let isVerticalSymmetrical = true;
+            for (let row = 0; row < gridSize; row++) {
+                for (let col = 0; col < Math.floor(gridSize/2); col++) {
+                    if (grid[row][col] !== grid[row][gridSize - 1 - col]) {
+                        isVerticalSymmetrical = false;
+                        break;
+                    }
+                }
+                if (!isVerticalSymmetrical) break;
+            }
+            
+            // 检查水平对称（上下对称）
+            let isHorizontalSymmetrical = true;
+            for (let row = 0; row < Math.floor(gridSize/2); row++) {
+                for (let col = 0; col < gridSize; col++) {
+                    if (grid[row][col] !== grid[gridSize - 1 - row][col]) {
+                        isHorizontalSymmetrical = false;
+                        break;
+                    }
+                }
+                if (!isHorizontalSymmetrical) break;
+            }
+            
+            // 检查对角线对称（左上到右下）
+            let isDiagonalSymmetrical = true;
+            for (let row = 0; row < gridSize; row++) {
+                for (let col = 0; col < row; col++) {
+                    if (grid[row][col] !== grid[col][row]) {
+                        isDiagonalSymmetrical = false;
+                        break;
+                    }
+                }
+                if (!isDiagonalSymmetrical) break;
+            }
+            
+            // 如果满足任意一种对称，则完成任务
+            isSymmetrical = isVerticalSymmetrical || isHorizontalSymmetrical || isDiagonalSymmetrical;
+            
+            if (isSymmetrical) {
+                // 保存当前试验的分数
+                trialScores[currentTrial - 1] = clickCount;
+                
+                // 显示任务完成提示
+                showTransitionMessage();
+                
+                // 延迟进入下一个任务或完成实验
+                if (currentTrial < totalTrials) {
+                    setTimeout(() => {
+                        hideTransitionMessage();
+                        initGrid(currentTrial); // 开始下一个图形
+                    }, 1500);
+                } else {
+                    // 如果是最后一个试验，延迟显示完成页面
+                    setTimeout(() => {
+                        hideTransitionMessage();
+                        showCompletionPage();
+                    }, 1500);
+                }
+            }
+        }
+        
+        // 显示任务转换提示
+        function showTransitionMessage() {
+            transitionMessage.style.display = 'block';
+        }
+        
+        // 隐藏任务转换提示
+        function hideTransitionMessage() {
+            transitionMessage.style.display = 'none';
+        }
+        
+        // 显示完成页面
+        function showCompletionPage() {
+            experimentPage.classList.add('hidden');
+            completionPage.classList.remove('hidden');
+            
+            // 更新成绩显示
+            let totalClicks = 0;
+            for (let i = 0; i < totalTrials; i++) {
+                trialScoreElements[i].textContent = trialScores[i];
+                totalClicks += trialScores[i];
+            }
+            
+            totalClicksElement.textContent = totalClicks;
+            averageClicksElement.textContent = (totalClicks / totalTrials).toFixed(1);
+        }
+        
+        // 事件监听
+        startBtn.addEventListener('click', () => {
+            instructionPage.classList.add('hidden');
+            experimentPage.classList.remove('hidden');
+            initGrid(0); // 开始第一个图形
+        });
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始状态
+        });
+    </script>
+</body>
+</html>
